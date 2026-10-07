@@ -1,0 +1,139 @@
+name: cryptotrace
+x-backend-env: &backend-env
+  CT_ENV: ${CT_ENV:-dev}
+  CT_PROVIDER: ${CT_PROVIDER:-fixture} # fixture | alchemy | etherscan
+  DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://ct:ct@postgres:5432/cryptotrace}
+  DATABASE_URL_SYNC: ${DATABASE_URL_SYNC:-postgresql+psycopg2://ct:ct@postgres:5432/cryptotrace}
+  REDIS_URL: redis://redis:6379/0
+  NEO4J_URI: bolt://neo4j:7687
+  NEO4J_USER: neo4j
+  NEO4J_PASSWORD: ${NEO4J_PASSWORD:-ct-neo4j-pass}
+  MINIO_ENDPOINT: minio:9000
+  MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-ctminio}
+  MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-ctminio-secret}
+  MINIO_BUCKET: evidence
+  JWT_SECRET: ${JWT_SECRET:-dev-only-change-me}
+  SAHYOG_HMAC_SECRET: ${SAHYOG_HMAC_SECRET:-dev-hmac}
+  ALCHEMY_API_KEY: ${ALCHEMY_API_KEY:-}
+  ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-}
+  MLFLOW_TRACKING_URI: http://mlflow:5000
+
+services:
+  postgres: # local dev DB. Staging/demo uses Supabase via DATABASE_URL in .env
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: ct, POSTGRES_PASSWORD: ct, POSTGRES_DB: cryptotrace }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U ct -d cryptotrace"], interval: 5s, timeout: 3s, retries: 20 }
+
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-ct-neo4j-pass}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 768m
+      NEO4J_server_memory_pagecache_size: 256m
+    ports: ["7474:7474", "7687:7687"]
+    volumes: [neo4jdata:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ${NEO4J_PASSWORD:-ct-neo4j-pass} 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 8s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 20 }
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-ctminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-ctminio-secret}
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [miniodata:/data]
+    healthcheck: { test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"], interval: 10s, timeout: 5s, retries: 10 }
+
+  minio-init: # creates the evidence bucket once, then exits
+    image: minio/mc:latest
+    depends_on: { minio: { condition: service_healthy } }
+    entrypoint: >
+      /bin/sh -c "mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-ctminio}
+      ${MINIO_ROOT_PASSWORD:-ctminio-secret}
+      && mc mb -p local/evidence && mc anonymous set none local/evidence; exit 0"
+
+  api:
+    profiles: ["app"]
+    build: { context: ., dockerfile: backend/Dockerfile }
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment: *backend-env
+    ports: ["8000:8000"]
+    volumes: ["./backend:/srv"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      neo4j: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      minio: { condition: service_healthy }
+
+  worker:
+    profiles: ["app"]
+    build: { context: ., dockerfile: backend/Dockerfile }
+    command: celery -A app.pipeline.celery_app worker -l INFO -c 2 -Q pipeline,default
+    environment: *backend-env
+    volumes: ["./backend:/srv"]
+    depends_on: [api]
+
+  beat:
+    profiles: ["app"]
+    build: { context: ., dockerfile: backend/Dockerfile }
+    command: celery -A app.pipeline.celery_app beat -l INFO
+    environment: *backend-env
+    volumes: ["./backend:/srv"]
+    depends_on: [api]
+
+  sahyog-mock:
+    profiles: ["app"]
+    build: { context: ., dockerfile: backend/Dockerfile }
+    command: uvicorn app.integrations.sahyog_mock.main:app --host 0.0.0.0 --port 8100
+    environment: *backend-env
+    ports: ["8100:8100"]
+    volumes: ["./backend:/srv"]
+
+  web:
+    profiles: ["app"]
+    build: { context: ./frontend, dockerfile: Dockerfile }
+    environment: { BACKEND_URL: "http://api:8000" }
+    ports: ["3000:3000"]
+    depends_on: [api]
+
+  mlflow:
+    profiles: ["ml"]
+    image: ghcr.io/mlflow/mlflow:latest
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
+    ports: ["5000:5000"]
+    volumes: [mlflowdata:/mlflow]
+
+  prometheus:
+    profiles: ["monitoring"]
+    image: prom/prometheus:latest
+    volumes: ["./infra/prometheus:/etc/prometheus:ro"]
+    ports: ["9090:9090"]
+
+  grafana:
+    profiles: ["monitoring"]
+    image: grafana/grafana-oss:latest
+    environment: { GF_SECURITY_ADMIN_PASSWORD: admin, GF_USERS_ALLOW_SIGN_UP: "false" }
+    volumes: ["./infra/grafana/provisioning:/etc/grafana/provisioning:ro", "./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro"]
+    ports: ["3001:3000"]
+    depends_on: [prometheus]
+
+  caddy: # TLS 1.3 edge (PPT: TLS 1.3). https://localhost:8443
+    profiles: ["edge"]
+    image: caddy:2-alpine
+    volumes: ["./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro", caddydata:/data]
+    ports: ["8443:8443"]
+    depends_on: [web, api]
+
+volumes: { pgdata: {}, neo4jdata: {}, miniodata: {}, mlflowdata: {}, caddydata: {} }

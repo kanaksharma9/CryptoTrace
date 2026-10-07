@@ -1,0 +1,11 @@
+* @kanak
+/backend/app/contracts/ @kanak
+/backend/app/pipeline/ @kanak
+/backend/app/engines/crosschain/ @kanak
+/backend/app/reports/ @kanak
+/backend/app/engines/risk/ @sristhi
+/.github/workflows/ /infra/prometheus/ /infra/grafana/ @sristhi
+/backend/app/chain/ /backend/app/graph/ /backend/app/engines/tracing/ /backend/app/engines/clustering/ @tanisha
+/backend/app/engines/attribution/ /backend/app/engines/monitoring/ @monica
+/frontend/ @simran
+/backend/app/api/ /backend/app/core/ /backend/app/db/ /backend/app/audit/ /backend/app/integrations/ /backend/alembic/ @himanshi

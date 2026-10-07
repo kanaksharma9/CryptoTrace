@@ -1,0 +1,1333 @@
+{
+  "Alert": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "address": {
+        "title": "Address",
+        "type": "string"
+      },
+      "alert_id": {
+        "format": "uuid",
+        "title": "Alert Id",
+        "type": "string"
+      },
+      "amount": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Amount"
+      },
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "kind": {
+        "enum": [
+          "new_outflow",
+          "reached_vasp",
+          "bridge_used",
+          "mixer_used"
+        ],
+        "title": "Kind",
+        "type": "string"
+      },
+      "message": {
+        "title": "Message",
+        "type": "string"
+      },
+      "ts": {
+        "format": "date-time",
+        "title": "Ts",
+        "type": "string"
+      },
+      "tx_hash": {
+        "title": "Tx Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "alert_id",
+      "case_id",
+      "chain",
+      "address",
+      "kind",
+      "tx_hash",
+      "message",
+      "ts"
+    ],
+    "title": "Alert",
+    "type": "object"
+  },
+  "Attribution": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      },
+      "EvidenceTier": {
+        "enum": [
+          "confirmed",
+          "probable",
+          "possible",
+          "unknown"
+        ],
+        "title": "EvidenceTier",
+        "type": "string"
+      },
+      "HeuristicHit": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "H1",
+              "H2",
+              "H3",
+              "H4",
+              "H5",
+              "H6"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "contribution": {
+            "title": "Contribution",
+            "type": "number"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "fired": {
+            "title": "Fired",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "weight": {
+            "title": "Weight",
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "fired",
+          "weight",
+          "contribution",
+          "detail"
+        ],
+        "title": "HeuristicHit",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "confidence": {
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Confidence",
+        "type": "number"
+      },
+      "entity_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Entity Id"
+      },
+      "evidence_tier": {
+        "$ref": "#/$defs/EvidenceTier"
+      },
+      "heuristics": {
+        "items": {
+          "$ref": "#/$defs/HeuristicHit"
+        },
+        "title": "Heuristics",
+        "type": "array"
+      },
+      "hop_distance": {
+        "title": "Hop Distance",
+        "type": "integer"
+      },
+      "label_source": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Label Source"
+      },
+      "needs_review": {
+        "default": false,
+        "title": "Needs Review",
+        "type": "boolean"
+      },
+      "path_tx_hashes": {
+        "default": [],
+        "items": {
+          "type": "string"
+        },
+        "title": "Path Tx Hashes",
+        "type": "array"
+      },
+      "proximity_rank": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Proximity Rank"
+      },
+      "terminal_address": {
+        "title": "Terminal Address",
+        "type": "string"
+      },
+      "vasp_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Vasp Id"
+      },
+      "vasp_name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Vasp Name"
+      }
+    },
+    "required": [
+      "case_id",
+      "chain",
+      "terminal_address",
+      "hop_distance",
+      "confidence",
+      "evidence_tier",
+      "heuristics"
+    ],
+    "title": "Attribution",
+    "type": "object"
+  },
+  "CaseSummary": {
+    "$defs": {
+      "CaseStatus": {
+        "enum": [
+          "received",
+          "tracing",
+          "clustering",
+          "attributing",
+          "crosschain",
+          "scoring",
+          "reporting",
+          "delivered",
+          "needs_review",
+          "failed"
+        ],
+        "title": "CaseStatus",
+        "type": "string"
+      },
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "complaint_ref": {
+        "title": "Complaint Ref",
+        "type": "string"
+      },
+      "created_at": {
+        "format": "date-time",
+        "title": "Created At",
+        "type": "string"
+      },
+      "seed_address": {
+        "title": "Seed Address",
+        "type": "string"
+      },
+      "status": {
+        "$ref": "#/$defs/CaseStatus"
+      },
+      "top_confidence": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Top Confidence"
+      },
+      "top_vasp": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Top Vasp"
+      }
+    },
+    "required": [
+      "case_id",
+      "complaint_ref",
+      "chain",
+      "seed_address",
+      "status",
+      "created_at"
+    ],
+    "title": "CaseSummary",
+    "type": "object"
+  },
+  "ComplaintIn": {
+    "$defs": {
+      "CaseSource": {
+        "enum": [
+          "ncrp",
+          "sahyog",
+          "manual"
+        ],
+        "title": "CaseSource",
+        "type": "string"
+      },
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "amount_lost_inr": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Amount Lost Inr"
+      },
+      "callback_url": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Callback Url"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "complaint_ref": {
+        "title": "Complaint Ref",
+        "type": "string"
+      },
+      "incident_time": {
+        "format": "date-time",
+        "title": "Incident Time",
+        "type": "string"
+      },
+      "narrative": {
+        "default": "",
+        "title": "Narrative",
+        "type": "string"
+      },
+      "source": {
+        "$ref": "#/$defs/CaseSource"
+      },
+      "suspect_wallet": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Suspect Wallet"
+      },
+      "tx_hash": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Tx Hash"
+      },
+      "victim_wallet": {
+        "title": "Victim Wallet",
+        "type": "string"
+      }
+    },
+    "required": [
+      "complaint_ref",
+      "source",
+      "victim_wallet",
+      "chain",
+      "incident_time"
+    ],
+    "title": "ComplaintIn",
+    "type": "object"
+  },
+  "CrossChainLink": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "amount_ratio": {
+        "title": "Amount Ratio",
+        "type": "number"
+      },
+      "asset": {
+        "title": "Asset",
+        "type": "string"
+      },
+      "bridge": {
+        "title": "Bridge",
+        "type": "string"
+      },
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "dst_address": {
+        "title": "Dst Address",
+        "type": "string"
+      },
+      "dst_amount": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "type": "string"
+          }
+        ],
+        "title": "Dst Amount"
+      },
+      "dst_chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "dst_tx": {
+        "title": "Dst Tx",
+        "type": "string"
+      },
+      "match_score": {
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Match Score",
+        "type": "number"
+      },
+      "method": {
+        "default": "predicate_v1",
+        "title": "Method",
+        "type": "string"
+      },
+      "src_address": {
+        "title": "Src Address",
+        "type": "string"
+      },
+      "src_amount": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "type": "string"
+          }
+        ],
+        "title": "Src Amount"
+      },
+      "src_chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "src_tx": {
+        "title": "Src Tx",
+        "type": "string"
+      },
+      "time_delta_s": {
+        "title": "Time Delta S",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "case_id",
+      "bridge",
+      "src_chain",
+      "dst_chain",
+      "src_tx",
+      "dst_tx",
+      "src_address",
+      "dst_address",
+      "src_amount",
+      "dst_amount",
+      "asset",
+      "time_delta_s",
+      "amount_ratio",
+      "match_score"
+    ],
+    "title": "CrossChainLink",
+    "type": "object"
+  },
+  "EntityCluster": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      },
+      "ClusterType": {
+        "enum": [
+          "deposit_sweep",
+          "cospend"
+        ],
+        "title": "ClusterType",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "addresses": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Addresses",
+        "type": "array"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "cluster_type": {
+        "$ref": "#/$defs/ClusterType"
+      },
+      "entity_id": {
+        "title": "Entity Id",
+        "type": "string"
+      },
+      "evidence": {
+        "default": [],
+        "items": {
+          "type": "string"
+        },
+        "title": "Evidence",
+        "type": "array"
+      },
+      "hub_address": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Hub Address"
+      },
+      "score": {
+        "default": 1.0,
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Score",
+        "type": "number"
+      }
+    },
+    "required": [
+      "entity_id",
+      "chain",
+      "cluster_type",
+      "addresses"
+    ],
+    "title": "EntityCluster",
+    "type": "object"
+  },
+  "PipelineEvent": {
+    "additionalProperties": false,
+    "properties": {
+      "artifact_sha256": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Artifact Sha256"
+      },
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "message": {
+        "default": "",
+        "title": "Message",
+        "type": "string"
+      },
+      "pct": {
+        "default": 0,
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Pct",
+        "type": "integer"
+      },
+      "stage": {
+        "enum": [
+          "ingest",
+          "trace",
+          "cluster",
+          "attribute",
+          "crosschain",
+          "risk",
+          "report",
+          "deliver"
+        ],
+        "title": "Stage",
+        "type": "string"
+      },
+      "state": {
+        "enum": [
+          "started",
+          "progress",
+          "done",
+          "failed"
+        ],
+        "title": "State",
+        "type": "string"
+      },
+      "ts": {
+        "format": "date-time",
+        "title": "Ts",
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_id",
+      "stage",
+      "state",
+      "ts"
+    ],
+    "title": "PipelineEvent",
+    "type": "object"
+  },
+  "RiskScore": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      },
+      "ModelScores": {
+        "additionalProperties": false,
+        "properties": {
+          "isoforest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Isoforest"
+          },
+          "revtrack": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revtrack"
+          },
+          "revtrack_mode": {
+            "default": "off",
+            "enum": [
+              "pretrained",
+              "fallback",
+              "off"
+            ],
+            "title": "Revtrack Mode",
+            "type": "string"
+          },
+          "xgboost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Xgboost"
+          }
+        },
+        "title": "ModelScores",
+        "type": "object"
+      },
+      "RiskCategory": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "title": "RiskCategory",
+        "type": "string"
+      },
+      "ShapContribution": {
+        "additionalProperties": false,
+        "properties": {
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "shap": {
+            "title": "Shap",
+            "type": "number"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feature",
+          "value",
+          "shap"
+        ],
+        "title": "ShapContribution",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "address": {
+        "title": "Address",
+        "type": "string"
+      },
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "category": {
+        "$ref": "#/$defs/RiskCategory"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "ensemble_confidence": {
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Ensemble Confidence",
+        "type": "number"
+      },
+      "features": {
+        "additionalProperties": {
+          "type": "number"
+        },
+        "title": "Features",
+        "type": "object"
+      },
+      "input_hash": {
+        "title": "Input Hash",
+        "type": "string"
+      },
+      "model_scores": {
+        "$ref": "#/$defs/ModelScores"
+      },
+      "model_version": {
+        "title": "Model Version",
+        "type": "string"
+      },
+      "score": {
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Score",
+        "type": "number"
+      },
+      "scored_at": {
+        "format": "date-time",
+        "title": "Scored At",
+        "type": "string"
+      },
+      "shap_top": {
+        "items": {
+          "$ref": "#/$defs/ShapContribution"
+        },
+        "title": "Shap Top",
+        "type": "array"
+      }
+    },
+    "required": [
+      "case_id",
+      "chain",
+      "address",
+      "score",
+      "category",
+      "model_scores",
+      "ensemble_confidence",
+      "shap_top",
+      "features",
+      "model_version",
+      "input_hash",
+      "scored_at"
+    ],
+    "title": "RiskScore",
+    "type": "object"
+  },
+  "TraceGraph": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      },
+      "EdgeType": {
+        "enum": [
+          "transfer",
+          "swap",
+          "bridge_in",
+          "bridge_out",
+          "mixer"
+        ],
+        "title": "EdgeType",
+        "type": "string"
+      },
+      "TraceNode": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "chain": {
+            "$ref": "#/$defs/Chain"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "first_seen": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "First Seen"
+          },
+          "hop": {
+            "title": "Hop",
+            "type": "integer"
+          },
+          "is_contract": {
+            "default": false,
+            "title": "Is Contract",
+            "type": "boolean"
+          },
+          "last_seen": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Last Seen"
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "ttr_score": {
+            "title": "Ttr Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "address",
+          "chain",
+          "hop",
+          "ttr_score"
+        ],
+        "title": "TraceNode",
+        "type": "object"
+      },
+      "TraceParams": {
+        "additionalProperties": false,
+        "properties": {
+          "alpha": {
+            "default": 0.15,
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "title": "Alpha",
+            "type": "number"
+          },
+          "confirmations": {
+            "default": 12,
+            "minimum": 0,
+            "title": "Confirmations",
+            "type": "integer"
+          },
+          "epsilon": {
+            "default": 0.0001,
+            "exclusiveMinimum": 0,
+            "title": "Epsilon",
+            "type": "number"
+          },
+          "max_hops": {
+            "default": 3,
+            "maximum": 6,
+            "minimum": 1,
+            "title": "Max Hops",
+            "type": "integer"
+          },
+          "max_out_degree": {
+            "default": 50,
+            "minimum": 5,
+            "title": "Max Out Degree",
+            "type": "integer"
+          },
+          "top_k": {
+            "default": 200,
+            "minimum": 10,
+            "title": "Top K",
+            "type": "integer"
+          },
+          "window_hours": {
+            "default": 720,
+            "minimum": 1,
+            "title": "Window Hours",
+            "type": "integer"
+          }
+        },
+        "title": "TraceParams",
+        "type": "object"
+      },
+      "TxEdge": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "amount_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Amount Usd"
+          },
+          "block_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Block Hash"
+          },
+          "block_number": {
+            "title": "Block Number",
+            "type": "integer"
+          },
+          "chain": {
+            "$ref": "#/$defs/Chain"
+          },
+          "dst": {
+            "title": "Dst",
+            "type": "string"
+          },
+          "edge_type": {
+            "$ref": "#/$defs/EdgeType",
+            "default": "transfer"
+          },
+          "log_index": {
+            "default": 0,
+            "title": "Log Index",
+            "type": "integer"
+          },
+          "src": {
+            "title": "Src",
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "token_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Token Address"
+          },
+          "token_symbol": {
+            "title": "Token Symbol",
+            "type": "string"
+          },
+          "tx_hash": {
+            "title": "Tx Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tx_hash",
+          "chain",
+          "src",
+          "dst",
+          "token_symbol",
+          "amount",
+          "timestamp",
+          "block_number"
+        ],
+        "title": "TxEdge",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "edges": {
+        "items": {
+          "$ref": "#/$defs/TxEdge"
+        },
+        "title": "Edges",
+        "type": "array"
+      },
+      "generated_at": {
+        "format": "date-time",
+        "title": "Generated At",
+        "type": "string"
+      },
+      "graph_hash": {
+        "title": "Graph Hash",
+        "type": "string"
+      },
+      "nodes": {
+        "items": {
+          "$ref": "#/$defs/TraceNode"
+        },
+        "title": "Nodes",
+        "type": "array"
+      },
+      "params": {
+        "$ref": "#/$defs/TraceParams"
+      },
+      "seed_address": {
+        "title": "Seed Address",
+        "type": "string"
+      },
+      "truncated": {
+        "default": false,
+        "title": "Truncated",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "case_id",
+      "seed_address",
+      "chain",
+      "nodes",
+      "edges",
+      "params",
+      "graph_hash",
+      "generated_at"
+    ],
+    "title": "TraceGraph",
+    "type": "object"
+  },
+  "TraceRequest": {
+    "$defs": {
+      "Chain": {
+        "enum": [
+          "eth",
+          "bsc",
+          "polygon"
+        ],
+        "title": "Chain",
+        "type": "string"
+      },
+      "TraceParams": {
+        "additionalProperties": false,
+        "properties": {
+          "alpha": {
+            "default": 0.15,
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "title": "Alpha",
+            "type": "number"
+          },
+          "confirmations": {
+            "default": 12,
+            "minimum": 0,
+            "title": "Confirmations",
+            "type": "integer"
+          },
+          "epsilon": {
+            "default": 0.0001,
+            "exclusiveMinimum": 0,
+            "title": "Epsilon",
+            "type": "number"
+          },
+          "max_hops": {
+            "default": 3,
+            "maximum": 6,
+            "minimum": 1,
+            "title": "Max Hops",
+            "type": "integer"
+          },
+          "max_out_degree": {
+            "default": 50,
+            "minimum": 5,
+            "title": "Max Out Degree",
+            "type": "integer"
+          },
+          "top_k": {
+            "default": 200,
+            "minimum": 10,
+            "title": "Top K",
+            "type": "integer"
+          },
+          "window_hours": {
+            "default": 720,
+            "minimum": 1,
+            "title": "Window Hours",
+            "type": "integer"
+          }
+        },
+        "title": "TraceParams",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "case_id": {
+        "format": "uuid",
+        "title": "Case Id",
+        "type": "string"
+      },
+      "chain": {
+        "$ref": "#/$defs/Chain"
+      },
+      "params": {
+        "$ref": "#/$defs/TraceParams",
+        "default": {
+          "alpha": 0.15,
+          "confirmations": 12,
+          "epsilon": 0.0001,
+          "max_hops": 3,
+          "max_out_degree": 50,
+          "top_k": 200,
+          "window_hours": 720
+        }
+      },
+      "seed_address": {
+        "title": "Seed Address",
+        "type": "string"
+      },
+      "seed_time": {
+        "format": "date-time",
+        "title": "Seed Time",
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_id",
+      "seed_address",
+      "chain",
+      "seed_time"
+    ],
+    "title": "TraceRequest",
+    "type": "object"
+  },
+  "_version": "1.0.0"
+}
